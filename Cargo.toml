@@ -1,0 +1,16 @@
+[package]
+name = "infinity-monkey"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fastrand = "2.2.0"
+num_cpus = "1.16.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+debug = false
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
