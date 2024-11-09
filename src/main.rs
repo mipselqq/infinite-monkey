@@ -11,18 +11,15 @@ use std::{
 };
 
 const SRC_TEXT: &str = include_str!("../war-and-peace.txt");
-const TERM_SHOWCASE: bool = false;
-const FILE_LOG_SHOWCASE: bool = true;
-const MAX_THREADS: Option<usize> = None;
+const TERM_SHOWCASE: bool = true;
+const FILE_LOG_SHOWCASE: bool = false;
+const MAX_THREADS: Option<usize> = Some(1);
 
 fn main() {
     let is_done = Arc::new(AtomicBool::new(false));
 
     let mut handles = Vec::new();
-    let threads_count = match MAX_THREADS {
-        Some(max_threads) => max_threads,
-        None => num_cpus::get(),
-    };
+    let threads_count = MAX_THREADS.unwrap_or_else(|| num_cpus::get());
 
     for thread_id in 1..=threads_count {
         let is_done = Arc::clone(&is_done);
@@ -67,7 +64,8 @@ fn start_guessing(log_filename: &str, is_done: Arc<AtomicBool>) -> ! {
 
             if random_char == text_char {
                 if FILE_LOG_SHOWCASE && i + 1 > longest_sequence_len {
-                    append_log(log_filename, &mut longest_sequence_len, random_char);
+                    append_log(log_filename, random_char);
+                    longest_sequence_len += 1
                 }
 
                 text_chars.next();
@@ -103,9 +101,7 @@ fn print_guessed_char_wait_for(random_char: char, i: usize, delay: u64) {
     }
 }
 
-fn append_log(filename: &str, longest_sequence_len: &mut usize, random_char: char) {
-    *longest_sequence_len += 1;
-
+fn append_log(filename: &str, random_char: char) {
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
